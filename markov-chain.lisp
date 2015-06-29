@@ -6,12 +6,12 @@
 
 (in-package :markov-text)
 
-(defparameter stochastic-matrix (make-hash-table :test #'equalp))
+(defparameter *stochastic-matrix* (make-hash-table :test #'equalp))
 
 (defun increment-table (first-word second-word)
-  (ensure-gethash first-word stochastic-matrix
+  (ensure-gethash first-word *stochastic-matrix*
 		  '())
-  (push second-word (gethash first-word stochastic-matrix)))
+  (push second-word (gethash first-word *stochastic-matrix*)))
 
 (defparameter *text* "CHAPTER I. Down the Rabbit-Hole
 
@@ -42,14 +42,6 @@ rabbit-hole under the hedge.")
 (defun split-text (text)
   (cl-ppcre:split "[\\s:.?!,();']+" text))
 
-(defun group-by-2 (lst)
-  (match lst
-    (() ())
-    ((list _) ())
-    ((list* a b rest)
-     (cons (list a b)
-	   (group-by-2 rest)))))
-
 (let ((word-list (split-text *text*)))
   (loop for word-one in word-list
      for word-two in (append (cdr word-list)
@@ -61,8 +53,8 @@ rabbit-hole under the hedge.")
 	     (if (zerop n)
 		 '()
 		 (cons word
-		       (iterate (random-elt (gethash word stochastic-matrix))
+		       (iterate (random-elt (gethash word *stochastic-matrix*))
 				(1- n))))))
-    (let ((first-word (random-elt (hash-table-keys stochastic-matrix))))
+    (let ((first-word (random-elt (hash-table-keys *stochastic-matrix*))))
       (iterate first-word n))))
 
