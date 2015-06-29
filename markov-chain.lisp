@@ -1,8 +1,7 @@
 (defpackage :markov-text
   (:use :common-lisp
 	:cl-ppcre
-	:alexandria
-	:optima))
+	:alexandria))
 
 (in-package :markov-text)
 
