@@ -1,4 +1,5 @@
 (defpackage :markov-text
   (:use :common-lisp
 	:cl-ppcre
-	:alexandria))
+	:alexandria)
+  (:export :make-markov-text-generator))
