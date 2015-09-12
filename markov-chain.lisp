@@ -7,12 +7,12 @@
 
 (defparameter *stochastic-matrix* (make-hash-table :test #'equalp))
 
-(defun increment-table (first-word second-word)
-  (ensure-gethash first-word *stochastic-matrix*
+(defun increment-table (stochastic-matrix first-word second-word)
+  (ensure-gethash first-word stochastic-matrix
 		  '())
-  (push second-word (gethash first-word *stochastic-matrix*)))
+  (push second-word (gethash first-word stochastic-matrix)))
 
-(defparameter *text* "CHAPTER I. Down the Rabbit-Hole
+(defparameter *example-text* "CHAPTER I. Down the Rabbit-Hole
 
 Alice was beginning to get very tired of sitting by her sister on the
 bank, and of having nothing to do: once or twice she had peeped into the
@@ -41,19 +41,22 @@ rabbit-hole under the hedge.")
 (defun split-text (text)
   (cl-ppcre:split "[\\s:.?!,();']+" text))
 
-(let ((word-list (split-text *text*)))
-  (loop for word-one in word-list
-     for word-two in (append (cdr word-list)
-			     (list (car word-list)))
-     do (increment-table word-one word-two)))
-
-(defun generate-text (n)
+(defun generate-text (stochastic-matrix n)
   (labels ((iterate (word n)
 	     (if (zerop n)
 		 '()
 		 (cons word
-		       (iterate (random-elt (gethash word *stochastic-matrix*))
+		       (iterate (random-elt (gethash word stochastic-matrix))
 				(1- n))))))
-    (let ((first-word (random-elt (hash-table-keys *stochastic-matrix*))))
+    (let ((first-word (random-elt (hash-table-keys stochastic-matrix))))
       (iterate first-word n))))
 
+(defun make-markov-text-generator (text)
+  (let ((stochastic-matrix (make-hash-table :test #'equalp))
+	(word-list (split-text text)))
+    (loop for word-one in word-list
+       for word-two in (append (cdr word-list)
+			       (list (car word-list)))
+       do (increment-table stochastic-matrix word-one word-two))
+    (lambda (n)
+      (generate-text stochastic-matrix n))))
