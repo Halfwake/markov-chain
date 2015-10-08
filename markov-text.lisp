@@ -1,8 +1,3 @@
-(defpackage :markov-text
-  (:use :common-lisp
-	:cl-ppcre
-	:alexandria))
-
 (in-package :markov-text)
 
 (defparameter *stochastic-matrix* (make-hash-table :test #'equalp))
@@ -42,14 +37,11 @@ rabbit-hole under the hedge.")
   (cl-ppcre:split "[\\s:.?!,();']+" text))
 
 (defun generate-text (stochastic-matrix n)
-  (labels ((iterate (word n)
-	     (if (zerop n)
-		 '()
-		 (cons word
-		       (iterate (random-elt (gethash word stochastic-matrix))
-				(1- n))))))
-    (let ((first-word (random-elt (hash-table-keys stochastic-matrix))))
-      (iterate first-word n))))
+  (flet ((random-key (hash-table)
+	   (random-elt (hash-table-keys hash-table))))
+    (loop for i to n
+       collect (random-elt (gethash (random-key stochastic-matrix)
+				    stochastic-matrix)))))
 
 (defun make-markov-text-generator (text)
   (let ((stochastic-matrix (make-hash-table :test #'equalp))
